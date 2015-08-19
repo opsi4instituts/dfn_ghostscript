@@ -1,0 +1,47 @@
+; Copyright (c) uib gmbh (www.uib.de)
+; This sourcecode is owned by uib gmbh
+; and published under the Terms of the General Public License.
+; credits: http://www.opsi.org/credits/
+
+Message "Searching installation of " + $ProductName$ + " 64 Bit..."
+Set $SearchPattern$ = $ProductName$
+; Parameter: $SearchPattern$ Suchbegriff in Registry
+Sub_search_registry64_uninstall_keys
+; Rückgabewert: $ResultList$ gefundene Einträge
+
+if ( count ($ResultList$) = "0" )
+	comment "No installations of " + $SearchPattern$ + " found in registry. Nothing to do ;-) "
+else
+	if (count($ResultList$) = "1")
+		comment "Found one installation of " + $SearchPattern$ + " in registry, trying to deinstall"
+
+		; hole UninstallProgram aus Registry
+		Set $RegId$ = takeSTring(0, $ResultList$)
+		Set $UninstallProgram$ = GetRegistryStringValue64("[" + $RegUninstall$ + "\" + $RegId$ + "] UninstallString")
+		; entferne störende Anführungszeichen im Registry-Wert
+		Set $UninstallProgram$ = takeString (1, splitString ( $UninstallProgram$ , '"'))
+		; InstallDir kann aus UninstallProgram extrahiert werden
+		Set $InstallDir$ = ExtractFilePath($UninstallProgram$)
+
+		Winbatch_uninstall
+		Sub_check_exitcode
+
+		;Uninstaller räumt nicht richtig auf
+		comment "Delete files"
+		Files_uninstall
+
+		if contains ($ConfigSystempath$, "yes")
+			comment "Removing directories from systempath"
+			Sub_remove_from_path
+		endif
+	else
+		logError "Found more than one installation! This case is not intended yet in this script! Stop now."
+		isFatalError
+	endif
+endif
+
+[Winbatch_uninstall]
+"$UninstallProgram$" /S
+
+[Files_uninstall]
+delete -sf $InstallDir$

@@ -1,0 +1,54 @@
+requiredWinstVersion >= "4.11.4.3"
+
+DefVar $LogDir$
+DefVar $ProductId$  
+DefVar $ProductName$
+DefVar $MinimumSpace$
+DefVar $SetupFile64$
+DefVar $ExitCode$
+DefVar $RegUninstall$
+DefVar $RegId$
+DefVar $MSVersion$
+DefVar $INST_architecture$
+DefVar $INST_SystemType$
+DefVar $SearchPattern$
+DefVar $InstallDir$
+DefVar $RegEnv$
+DefVar $UninstallProgram$
+DefVar $ConfigSystempath$
+DefVar $path$
+DefVar $path_before$
+
+DefStringList $ResultList$
+
+Set $LogDir$ 		= "%opsiLogDir%"
+Set $INST_SystemType$   = GetSystemType
+Set $INST_architecture$ = GetProductProperty("install_architecture","system specific")
+Set $MSVersion$	    	= GetMsVersionInfo
+
+if not ($MSVersion$ = "6.1")
+	Logwarning "OPSI package only tested with windows 7! Please report successful usage on other windows versions to the maintainer."
+endif
+if not (($INST_SystemType$ = "64 Bit System") and (($INST_architecture$ = "system specific") or ($INST_architecture$ = "both") or ($INST_architecture$ = "64 only")))
+	LogError "Actually there is no 32 bit version included in this packet!"
+	isFatalError
+endif
+
+Set $ConfigSystempath$ = GetProductProperty("config_systempath","yes with reboot")
+
+; ---------------------------------------------------------------
+; - Please edit the following values                             -
+; ----------------------------------------------------------------
+
+Set $ProductId$		= "dfn_ghostscript"
+Set $ProductName$       = "Ghostscript"
+Set $MinimumSpace$	= "40 MB"
+Set $SetupFile64$	= "gs916w64.exe"
+Set $RegUninstall$	= "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
+Set $RegEnv$  = "[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment]"
+; ----------------------------------------------------------------
+
+include_append "section_sub_check_exitcode.opsiinc"
+include_append "section_sub_search_registry64_uninstall_keys.opsiinc"
+include_append "section_sub_config_systempath.opsiinc"
+

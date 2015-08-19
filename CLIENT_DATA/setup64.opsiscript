@@ -1,0 +1,56 @@
+; Copyright (c) uib gmbh (www.uib.de)
+; This sourcecode is owned by uib gmbh
+; and published under the Terms of the General Public License.
+; credits: http://www.opsi.org/credits/
+
+[Actions]
+include_insert "common.opsiinc"
+
+if not(HasMinimumSpace ("%SystemDrive%", $MinimumSpace$))
+	LogError "Not enough space on %SystemDrive%, " + $MinimumSpace$ + " on drive %SystemDrive% needed for " + $ProductId$
+	isFatalError
+	; Stop process and set installation status to failed
+else
+	comment "Show product picture"
+	ShowBitmap "%ScriptPath%\" + $ProductName$ + ".png" $ProductName$
+
+	if FileExists("%ScriptPath%\delsub64.opsiscript")
+		comment "Start uninstall sub section"
+		Sub "%ScriptPath%\delsub64.opsiscript"
+	endif
+
+	Message "Installing " + $ProductName$ + " ..."
+
+	comment "Start setup program"
+	Winbatch_install
+	Sub_check_exitcode
+		
+	comment "Test for installation success"
+		
+	Set $SearchPattern$ = $ProductName$
+	; Parameter: $SearchPattern$ Suchbegriff in Registry
+	Sub_search_registry64_uninstall_keys
+	; Rückgabewert: $ResultList$ gefundene Einträge
+
+	if ( count ($ResultList$) = "0" )
+		logError "Fatal: After Installation " + $ProductName$ + " could not be found in " + $RegPathUninstall$
+		isFatalError
+	else
+		comment "Successful Installation"
+		
+		if contains ($ConfigSystempath$, "yes")
+			comment "Adding directories to systempath"
+			Set $RegId$ = takeSTring(0, $ResultList$)
+			; InstallDir muss aus UninstallString extrahiert werden
+			Set $UninstallProgram$ = GetRegistryStringValue64("[" + $RegUninstall$ + "\" + $RegId$ + "] UninstallString")
+			; entferne störende Anführungszeichen im Registry-Wert
+			Set $UninstallProgram$ = takeString (1, splitString ( $UninstallProgram$ , '"'))
+			Set $InstallDir$ = ExtractFilePath($UninstallProgram$)
+			Sub_add_to_path
+		endif
+	endif		
+endif
+
+[Winbatch_install]
+"%ScriptPath%\$SetupFile64$" /S
+

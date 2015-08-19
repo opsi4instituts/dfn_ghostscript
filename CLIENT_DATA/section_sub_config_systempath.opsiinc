@@ -1,0 +1,50 @@
+[Sub_add_to_path]
+DefStringList $dirsToAdd$
+
+Set $dirsToAdd$  = createStringList ($InstallDir$ + 'lib', $InstallDir$ + 'bin')
+set $path_before$ = GetRegistryStringValueSysNative($RegEnv$ + " Path")
+set $path$ = $path_before$
+
+for %s% in $dirsToAdd$ do Sub_add_item_to_path ;prüfe, ob schon pfade vorhanden sind
+Sub_commit_changes
+
+[Sub_remove_from_path]
+DefStringList $splitted$
+
+;der momentane Index, verwendet, damit die schleifen wissen, wo sie sich grade befinden
+set $path_before$ = GetRegistryStringValueSysNative($RegEnv$ + " Path")
+set $path$ = $path_before$
+set $splitted$ = splitString ($path$, ";")
+;dahinter fehlen jetzt die semikolons, also beim vergleichen wieder anfügen
+                                                         
+for %a% in $splitted$ do Sub_remove_item_from_path
+Sub_commit_changes
+
+[Sub_commit_changes]
+comment "Path before: '" + $path_before$ + "'"
+comment "Path now: '" + $path$ + "'"
+
+registry_write_path
+
+; only reboot if "Path" was changed and reboot desired
+if ($ConfigSystempath$ = "yes with reboot") 
+	if not (lower($path$) = lower($path_before$))
+		ExitWindows /Reboot
+	endif
+endif
+
+[Sub_add_item_to_path]
+if not (contains ($path$, "%s%"))
+	set $path$ = $path$ + ";" + "%s%"
+endif
+
+[Sub_remove_item_from_path]
+if contains ("%a%", $InstallDir$)
+	set $path$ = stringReplace($path$, ";" + "%a%" , "")
+	set $path$ = stringReplace($path$, "%a%" + ";" , "")
+endif
+
+[registry_write_path]
+openkey $RegEnv$
+set "Path"=REG_EXPAND_SZ:"$path$"
+
