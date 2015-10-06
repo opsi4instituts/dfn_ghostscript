@@ -10,8 +10,6 @@ Sub_commit_changes
 
 [Sub_remove_from_path]
 DefStringList $splitted$
-
-;der momentane Index, verwendet, damit die schleifen wissen, wo sie sich grade befinden
 set $path_before$ = GetRegistryStringValueSysNative($RegEnv$ + " Path")
 set $path$ = $path_before$
 set $splitted$ = splitString ($path$, ";")

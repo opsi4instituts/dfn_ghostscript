@@ -43,7 +43,7 @@ Set $ConfigSystempath$ = GetProductProperty("config_systempath","yes with reboot
 Set $ProductId$		= "dfn_ghostscript"
 Set $ProductName$       = "Ghostscript"
 Set $MinimumSpace$	= "40 MB"
-Set $SetupFile64$	= "gs916w64.exe"
+Set $SetupFile64$	= "gs918w64.exe"
 Set $RegUninstall$	= "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
 Set $RegEnv$  = "[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment]"
 ; ----------------------------------------------------------------
