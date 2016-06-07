@@ -3,6 +3,7 @@ requiredWinstVersion >= "4.11.4.3"
 DefVar $LogDir$
 DefVar $ProductId$  
 DefVar $ProductName$
+DefVar $ProductVersion$
 DefVar $MinimumSpace$
 DefVar $SetupFile64$
 DefVar $ExitCode$
@@ -19,7 +20,7 @@ DefVar $ConfigSystempath$
 DefVar $path$
 DefVar $path_before$
 
-DefStringList $ResultList$
+DefStringList $ResultList64$
 
 Set $LogDir$ 		= "%opsiLogDir%"
 Set $INST_SystemType$   = GetSystemType
@@ -36,14 +37,17 @@ endif
 
 Set $ConfigSystempath$ = GetProductProperty("config_systempath","yes with reboot")
 
+Set $ProductVersion$ = takestring (0, splitString("%installingProdVersion%", "-"))
+; Version lautet z.B. "9.19", Dateien lauten "919, also Punkt muss weg
+Set $ProductVersion$ = takestring (0, splitString($ProductVersion$, ".")) + takestring (1, splitString($ProductVersion$, "."))
+
 ; ---------------------------------------------------------------
 ; - Please edit the following values                             -
 ; ----------------------------------------------------------------
-
-Set $ProductId$		= "dfn_ghostscript"
+Set $ProductId$	= "dfn_ghostscript"
 Set $ProductName$       = "Ghostscript"
 Set $MinimumSpace$	= "40 MB"
-Set $SetupFile64$	= "gs918w64.exe"
+Set $SetupFile64$	= "gs" + $ProductVersion$ + "w64.exe"
 Set $RegUninstall$	= "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
 Set $RegEnv$  = "[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment]"
 ; ----------------------------------------------------------------

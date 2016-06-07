@@ -32,7 +32,7 @@ else
 	Sub_search_registry64_uninstall_keys
 	; Rückgabewert: $ResultList$ gefundene Einträge
 
-	if ( count ($ResultList$) = "0" )
+	if ( count ($ResultList64$) = "0" )
 		logError "Fatal: After Installation " + $ProductName$ + " could not be found in " + $RegPathUninstall$
 		isFatalError
 	else
@@ -40,7 +40,7 @@ else
 		
 		if contains ($ConfigSystempath$, "yes")
 			comment "Adding directories to systempath"
-			Set $RegId$ = takeSTring(0, $ResultList$)
+			Set $RegId$ = takeSTring(0, $ResultList64$)
 			; InstallDir muss aus UninstallString extrahiert werden
 			Set $UninstallProgram$ = GetRegistryStringValue64("[" + $RegUninstall$ + "\" + $RegId$ + "] UninstallString")
 			; entferne störende Anführungszeichen im Registry-Wert

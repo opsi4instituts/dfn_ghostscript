@@ -9,14 +9,14 @@ Set $SearchPattern$ = $ProductName$
 Sub_search_registry64_uninstall_keys
 ; Rückgabewert: $ResultList$ gefundene Einträge
 
-if ( count ($ResultList$) = "0" )
+if ( count ($ResultList64$) = "0" )
 	comment "No installations of " + $SearchPattern$ + " found in registry. Nothing to do ;-) "
 else
-	if (count($ResultList$) = "1")
+	if (count($ResultList64$) = "1")
 		comment "Found one installation of " + $SearchPattern$ + " in registry, trying to deinstall"
 
 		; hole UninstallProgram aus Registry
-		Set $RegId$ = takeSTring(0, $ResultList$)
+		Set $RegId$ = takeString(0, $ResultList64$)
 		Set $UninstallProgram$ = GetRegistryStringValue64("[" + $RegUninstall$ + "\" + $RegId$ + "] UninstallString")
 		; entferne störende Anführungszeichen im Registry-Wert
 		Set $UninstallProgram$ = takeString (1, splitString ( $UninstallProgram$ , '"'))
