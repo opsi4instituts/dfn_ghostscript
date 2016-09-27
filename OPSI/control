@@ -1,5 +1,5 @@
 [Package]
-version: 2
+version: 1
 depends: 
 incremental: False
 
@@ -9,7 +9,7 @@ id: dfn_ghostscript
 name: Ghostscript
 description: Ein freier Interpreter der Seitenbeschreibungssprachen PostScript und PDF
 advice: 
-version: 9.19
+version: 9.20
 priority: 0
 licenseRequired: False
 productClasses: 
@@ -40,6 +40,11 @@ values: ["no", "yes with reboot", "yes without reboot"]
 default: ["yes with reboot"]
 
 [Changelog]
+dfn_ghostscript (9.20-1)
+	* neue Upstreamversion
+	* o4i-Logo
+-- Thomas Besser (archIT/KIT) <thomas.besser@kit.edu>, 27.09.2016
+
 dfn_ghostscript (9.19-2)
 	* Fix für fehlerhafte Suche nach Installation (zusätzliche Prüfung)
  -- Lukas Stapelbroek (archIT/KIT) <lukas.stapelbroek9@kit.edu>, 07.06.2016
@@ -62,6 +67,8 @@ dfn_ghostscript (9.16-1)
 	* initiales DFN-Paket
 	* Ghostscript Verzeichnisse 'lib' bzw. 'bin' zum Systempfad konfigurieren, damit z.B. Inkscape EPS Dateien öffnen kann (https://inkscape.org/de/lernen/haufig-gestellte-fragen/#How_to_open_EPS_files_in_Windows)
  -- Lukas Stapelbroek (archIT/KIT) <lukas.stapelbroek9@kit.edu>, 10.08.2015
+
+
 
 
 
