@@ -38,7 +38,9 @@ endif
 
 [Sub_remove_item_from_path]
 if contains ("%a%", $InstallDir$)
+	;if there is a leading ";", we know that there are values in front of this one, so we can delete ";VALUE" completly
 	set $path$ = stringReplace($path$, ";" + "%a%" , "")
+	;if the value is still there now, there are no entrys before this one, so have to remove "VALUE;"
 	set $path$ = stringReplace($path$, "%a%" + ";" , "")
 endif
 
