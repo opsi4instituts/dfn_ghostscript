@@ -19,6 +19,9 @@ DefVar $UninstallProgram$
 DefVar $ConfigSystempath$
 DefVar $path$
 DefVar $path_before$
+DefStringList $dirsToAdd$
+DefStringList $splitted$
+DefVar $CurrentPathElement$
 
 DefStringList $ResultList64$
 
@@ -56,3 +59,11 @@ include_append "section_sub_check_exitcode.opsiinc"
 include_append "section_sub_search_registry64_uninstall_keys.opsiinc"
 include_append "section_sub_config_systempath.opsiinc"
 
+comment "Show product picture"
+if (FileExists("%ScriptPath%\..\lib\icons\%installingProdName%.png"))
+       comment "logo at local library/icons found."
+       ShowBitmap "%ScriptPath%\..\lib\icons\%installingProdName%.png" $ProductName$
+else
+       comment "no logo at local library/icons, use from ScriptPath ..."
+       ShowBitmap "%ScriptPath%\o4i.png" $ProductName$
+endif

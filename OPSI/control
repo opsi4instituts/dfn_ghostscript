@@ -9,7 +9,7 @@ id: dfn_ghostscript
 name: Ghostscript
 description: Ein freier Interpreter der Seitenbeschreibungssprachen PostScript und PDF
 advice: 
-version: 9.21
+version: 9.22
 priority: 0
 licenseRequired: False
 productClasses: 
@@ -40,6 +40,13 @@ values: ["no", "yes with reboot", "yes without reboot"]
 default: ["yes with reboot"]
 
 [Changelog]
+dfn_ghostscript (9.22-1)
+        * neue Upstreamversion
+        * alte uib Copyrights (Überbleibsel von opsi-template) entfernt
+        * o4i-Logo: Anzeigeaufruf nach common.opsiinc ausgelagert, eigenes Logo möglich
+        * alle Variablendefinitionen nach common.opsiinc
+-- Thomas Besser (archIT/KIT) <thomas.besser@kit.edu>, 05.10.2017
+
 dfn_ghostscript (9.21-1)
         * neue Upstreamversion
 -- Thomas Besser (archIT/KIT) <thomas.besser@kit.edu>, 17.03.2017

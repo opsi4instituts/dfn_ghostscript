@@ -1,6 +1,4 @@
 [Sub_add_to_path]
-DefStringList $dirsToAdd$
-
 Set $dirsToAdd$  = createStringList ($InstallDir$ + 'lib', $InstallDir$ + 'bin')
 set $path_before$ = GetRegistryStringValueSysNative($RegEnv$ + " Path")
 set $path$ = $path_before$
@@ -9,7 +7,6 @@ for %s% in $dirsToAdd$ do Sub_add_item_to_path ;prüfe, ob schon pfade vorhanden
 Sub_commit_changes
 
 [Sub_remove_from_path]
-DefStringList $splitted$
 set $path_before$ = GetRegistryStringValueSysNative($RegEnv$ + " Path")
 set $path$ = $path_before$
 set $splitted$ = splitString ($path$, ";")
@@ -37,7 +34,10 @@ if not (contains ($path$, "%s%"))
 endif
 
 [Sub_remove_item_from_path]
-if contains ("%a%", $InstallDir$)
+
+set $CurrentPathElement$ = "%a%"
+; contains ist case-sensitive, lower vermeidet Fehler beim Entfernen (Danke an Andreas Welbers für den Patch!)
+if contains (lower($CurrentPathElement$), lower($InstallDir$))
 	;if there is a leading ";", we know that there are values in front of this one, so we can delete ";VALUE" completly
 	set $path$ = stringReplace($path$, ";" + "%a%" , "")
 	;if the value is still there now, there are no entrys before this one, so have to remove "VALUE;"
