@@ -4,13 +4,14 @@ DefVar $LogDir$
 DefVar $ProductId$  
 DefVar $ProductName$
 DefVar $ProductVersion$
+DefVar $ProductVersionWoDots$
+DefVar $InstalledVersion$
 DefVar $MinimumSpace$
 DefVar $SetupFile64$
 DefVar $ExitCode$
 DefVar $RegUninstall$
 DefVar $RegId$
 DefVar $MSVersion$
-DefVar $INST_architecture$
 DefVar $INST_SystemType$
 DefVar $SearchPattern$
 DefVar $InstallDir$
@@ -22,18 +23,19 @@ DefVar $path_before$
 DefStringList $dirsToAdd$
 DefStringList $splitted$
 DefVar $CurrentPathElement$
+DefVar $CustomPostInstall$
+DefVar $CustomPostDeinstall$
 
 DefStringList $ResultList64$
 
 Set $LogDir$ 		= "%opsiLogDir%"
 Set $INST_SystemType$   = GetSystemType
-Set $INST_architecture$ = GetProductProperty("install_architecture","system specific")
 Set $MSVersion$	    	= GetMsVersionInfo
 
-if not ($MSVersion$ = "6.1" OR $MSVersion$ = "10.0")
-	Logwarning "Only tested with windows 7 and 10! Please report to the maintainer successful installation on other windows versions."	
+if not ($MSVersion$ = "10.0")
+	Logwarning "Only tested with windows 10! Please report to the maintainer successful installation on other windows versions."	
 endif
-if not (($INST_SystemType$ = "64 Bit System") and (($INST_architecture$ = "system specific") or ($INST_architecture$ = "both") or ($INST_architecture$ = "64 only")))
+if not ($INST_SystemType$ = "64 Bit System")
 	LogError "Actually there is no 32 bit version included in this packet!"
 	isFatalError
 endif
@@ -41,8 +43,8 @@ endif
 Set $ConfigSystempath$ = GetProductProperty("config_systempath","yes with reboot")
 
 Set $ProductVersion$ = takestring (0, splitString("%installingProdVersion%", "-"))
-; Version lautet z.B. "9.19", Dateien lauten "919, also Punkt muss weg
-Set $ProductVersion$ = takestring (0, splitString($ProductVersion$, ".")) + takestring (1, splitString($ProductVersion$, "."))
+; Version lautet z.B. "9.19", Dateien lauten "919, also Punkt muss für Setupfile weg
+Set $ProductVersionWoDots$ = takestring (0, splitString($ProductVersion$, ".")) + takestring (1, splitString($ProductVersion$, "."))
 
 ; ---------------------------------------------------------------
 ; - Please edit the following values                             -
@@ -50,7 +52,7 @@ Set $ProductVersion$ = takestring (0, splitString($ProductVersion$, ".")) + take
 Set $ProductId$	= "dfn_ghostscript"
 Set $ProductName$       = "Ghostscript"
 Set $MinimumSpace$	= "40 MB"
-Set $SetupFile64$	= "gs" + $ProductVersion$ + "w64.exe"
+Set $SetupFile64$	= "gs" + $ProductVersionWoDots$ + "w64.exe"
 Set $RegUninstall$	= "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
 Set $RegEnv$  = "[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment]"
 ; ----------------------------------------------------------------

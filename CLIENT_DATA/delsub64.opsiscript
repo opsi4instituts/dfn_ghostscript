@@ -29,6 +29,14 @@ else
 			comment "Removing directories from systempath"
 			Sub_remove_from_path
 		endif
+		
+		comment "include custom post deinstall file"
+		set $CustomPostDeinstall$ = getProductProperty("custom-post-deinstall","none")
+		if not ($CustomPostDeinstall$ = "none")
+			if FileExists("%ScriptPath%\custom\" + $CustomPostDeinstall$)
+				include_insert "%ScriptPath%\custom\" + $CustomPostDeinstall$
+			endif
+		endif
 	else
 		logError "Found more than one installation! This case is not intended yet in this script! Stop now."
 		isFatalError

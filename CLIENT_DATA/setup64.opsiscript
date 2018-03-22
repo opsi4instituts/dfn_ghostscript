@@ -30,9 +30,16 @@ else
 	else
 		comment "Successful Installation"
 		
+		Set $RegId$ = takeSTring(0, $ResultList64$)
+		Set $InstalledVersion$ = GetRegistryStringValue64("[" + $RegUninstall$ + "\" + $RegId$ + "] DisplayVersion")
+		
+		if not ($InstalledVersion$ = $ProductVersion$)
+			LogError "Fatal: version of installation differ from package"
+			isFatalError
+		endif
+		
 		if contains ($ConfigSystempath$, "yes")
 			comment "Adding directories to systempath"
-			Set $RegId$ = takeSTring(0, $ResultList64$)
 			; InstallDir muss aus UninstallString extrahiert werden
 			Set $UninstallProgram$ = GetRegistryStringValue64("[" + $RegUninstall$ + "\" + $RegId$ + "] UninstallString")
 			; entferne störende Anführungszeichen im Registry-Wert
@@ -40,6 +47,14 @@ else
 			Set $InstallDir$ = ExtractFilePath($UninstallProgram$)
 			Sub_add_to_path
 		endif
+		
+		comment "include custom post install file"
+		set $CustomPostInstall$ = getProductProperty("custom-post-install","none")
+		if not ($CustomPostInstall$ = "none")
+			if FileExists("%ScriptPath%\custom\" + $CustomPostInstall$)
+				include_insert "%ScriptPath%\custom\" + $CustomPostInstall$
+			endif
+		endif		
 	endif		
 endif
 
