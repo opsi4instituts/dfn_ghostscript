@@ -1,33 +1,40 @@
 Message "Searching installation of " + $ProductName$ + " 64 Bit..."
-Set $SearchPattern$ = $ProductName$
-; Parameter: $SearchPattern$ Suchbegriff in Registry
-Sub_search_registry64_uninstall_keys
-; Rückgabewert: $ResultList$ gefundene Einträge
+; Ergebnis ist StringList (mehrere Einträge möglich);
+; in einer Zeile werden drei Ergebnisse mit "|" abgetrennt geliefert: Registrykey (mit Pfad) | Bereich Registry (kann direkt getRegistryValue übergeben werden | DisplayName
+; z.B. HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Test64|64bit|Test Registry Entry64
+Set $ResultList$ = SearchRegistryUninstallKeys($ProductName$)
 
-if ( count ($ResultList64$) = "0" )
-	comment "No installations of " + $SearchPattern$ + " found in registry. Nothing to do ;-) "
-else
-	if (count($ResultList64$) = "1")
-		comment "Found one installation of " + $SearchPattern$ + " in registry, trying to deinstall"
+Switch count ($ResultList$)
+	Case "0"
+		comment "No installations of " + $ProductName$ + " found in registry. Nothing to do ;-) "
+	EndCase
+	Case "1"
+		comment "Found one installation of " + $ProductName$ + " in registry, trying to deinstall"
 
-		; hole UninstallProgram aus Registry
-		Set $RegId$ = takeString(0, $ResultList64$)
-		Set $UninstallProgram$ = GetRegistryStringValue64("[" + $RegUninstall$ + "\" + $RegId$ + "] UninstallString")
+		Set $RegId$ = takeString (0,splitString(takeString(0,$ResultList$), '|'))
+		Set $RegBitScope$ = takeString (1,splitString(takeString(0,$ResultList$), '|'))
+
+		Set $UninstallProgram$ = GetRegistryValue($RegId$, "UninstallString", $RegBitScope$)
 		; entferne störende Anführungszeichen im Registry-Wert
 		Set $UninstallProgram$ = takeString (1, splitString ( $UninstallProgram$ , '"'))
 		; InstallDir kann aus UninstallProgram extrahiert werden
 		Set $InstallDir$ = ExtractFilePath($UninstallProgram$)
 
 		Winbatch_uninstall
-		Sub_check_exitcode
+		Set $ExitCode$ = getLastExitCode
+		if stringToBool(isMsExitcodeFatal($ExitCode$, "True", $ErrorString$))
+			isFatalError
+		endif		
 
-		;Uninstaller räumt nicht richtig auf
-		comment "Delete files"
-		Files_uninstall
+		;löscht vielleicht vorhandene Überbleibsel des Programmes
+		if FileExists($InstallDir$)
+			Files_uninstall
+		endif	
 
 		if contains ($ConfigSystempath$, "yes")
 			comment "Removing directories from systempath"
-			Sub_remove_from_path
+			; function call to remove all directories which contain the installation directory from the system path
+			Set $FunctionStatus$ = RemoveContainingFromPath($InstallDir$)
 		endif
 		
 		comment "include custom post deinstall file"
@@ -37,11 +44,12 @@ else
 				include_insert "%ScriptPath%\custom\" + $CustomPostDeinstall$
 			endif
 		endif
-	else
+	EndCase
+	DefaultCase
 		logError "Found more than one installation! This case is not intended yet in this script! Stop now."
 		isFatalError
-	endif
-endif
+	EndCase
+EndSwitch
 
 [Winbatch_uninstall]
 "$UninstallProgram$" /S

@@ -1,7 +1,6 @@
 [Package]
 version: 1
 depends: 
-incremental: False
 
 [Product]
 type: localboot
@@ -9,7 +8,7 @@ id: dfn_ghostscript
 name: Ghostscript
 description: Ein freier Interpreter der Seitenbeschreibungssprachen PostScript und PDF
 advice: 
-version: 9.23
+version: 9.24
 priority: 0
 licenseRequired: False
 productClasses: 
@@ -49,6 +48,16 @@ values: ["no", "yes with reboot", "yes without reboot"]
 default: ["yes with reboot"]
 
 [Changelog]
+dfn_ghostscript (9.24-1)
+	* neue Upstreamversion
+	* neue Registrysuche (https://github.com/opsi4instituts/lib, winst-Version 4.12.0.16 Voraussetzung)
+	* Verwendung uib_exitcode (local function)
+-- Thomas Besser (archIT/KIT) <thomas.besser@kit.edu>, 05.09.2018
+
+dfn_ghostscript (9.23-2)
+	* Systempfadkonfigurationssubroutinen als lokale Funktion implementiert
+-- Francesco Ritt (archIT/KIT) <francesco.ritt9@kit.edu>, 12.04.2018
+
 dfn_ghostscript (9.23-1)
 	* neue Upstreamversion (https://ghostscript.com/doc/9.23/News.htm)
 	* ProductProperty "custom-post-install" bzw. "custom-post-deinstall" gem. o4i-Richtlinie hinzugefügt

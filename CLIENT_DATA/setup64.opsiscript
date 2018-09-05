@@ -11,28 +11,31 @@ else
 		Sub "%ScriptPath%\delsub64.opsiscript"
 	endif
 
-	Message "Installing " + $ProductName$ + " ..."
-
+	Message "Installing %installingProdName% (%installingProdVersion%) 64 Bit..."
 	comment "Start setup program"
 	Winbatch_install
-	Sub_check_exitcode
+	Set $ExitCode$ = getLastExitCode
+	if stringToBool(isMsExitcodeFatal($ExitCode$, "True", $ErrorString$))
+		isFatalError
+	endif	
 		
 	comment "Test for installation success"
-		
-	Set $SearchPattern$ = $ProductName$
-	; Parameter: $SearchPattern$ Suchbegriff in Registry
-	Sub_search_registry64_uninstall_keys
-	; Rückgabewert: $ResultList$ gefundene Einträge
-
-	if ( count ($ResultList64$) = "0" )
-		logError "Fatal: After Installation " + $ProductName$ + " could not be found in " + $RegPathUninstall$
+	; Ergebnis ist StringList (mehrere Einträge möglich);
+	; in einer Zeile werden drei Ergebnisse mit "|" abgetrennt geliefert: Registrykey (mit Pfad) | Bereich Registry (kann direkt getRegistryValue übergeben werden | DisplayName
+	; z.B. HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Test64|64bit|Test Registry Entry64
+	Set $ResultList$ = SearchRegistryUninstallKeys($ProductName$)	
+	
+	if ( count ($ResultList$) = "0" )
+		logError "Fatal: After Installation " + $ProductName$ + " could not be found in registry"
 		isFatalError
 	else
 		comment "Successful Installation"
-		
-		Set $RegId$ = takeSTring(0, $ResultList64$)
-		Set $InstalledVersion$ = GetRegistryStringValue64("[" + $RegUninstall$ + "\" + $RegId$ + "] DisplayVersion")
-		
+
+		Set $RegId$ = takeString (0,splitString(takeString(0,$ResultList$), '|'))
+		Set $RegBitScope$ = takeString (1,splitString(takeString(0,$ResultList$), '|'))
+
+		comment "Check version"
+		Set $InstalledVersion$ = GetRegistryValue($RegId$, "DisplayVersion", $RegBitScope$)
 		if not ($InstalledVersion$ = $ProductVersion$)
 			LogError "Fatal: version of installation differ from package"
 			isFatalError
@@ -41,11 +44,14 @@ else
 		if contains ($ConfigSystempath$, "yes")
 			comment "Adding directories to systempath"
 			; InstallDir muss aus UninstallString extrahiert werden
-			Set $UninstallProgram$ = GetRegistryStringValue64("[" + $RegUninstall$ + "\" + $RegId$ + "] UninstallString")
+			Set $UninstallProgram$ = GetRegistryValue($RegId$, "UninstallString", $RegBitScope$)
 			; entferne störende Anführungszeichen im Registry-Wert
 			Set $UninstallProgram$ = takeString (1, splitString ( $UninstallProgram$ , '"'))
 			Set $InstallDir$ = ExtractFilePath($UninstallProgram$)
-			Sub_add_to_path
+			
+			Set $PathDirsToAdd$ = createStringList($InstallDir$ + "lib", $InstallDir$ + "bin")
+			; function call with directories to add to the system path
+			Set $FunctionStatus$ = AddToPath($PathDirsToAdd$)
 		endif
 		
 		comment "include custom post install file"

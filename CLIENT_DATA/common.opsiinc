@@ -1,32 +1,31 @@
-requiredWinstVersion >= "4.11.4.3"
+requiredWinstVersion >= "4.12.0.16"
 
+DefVar $ConfigSystempath$
+DefVar $CurrentPathElement$
+DefVar $CustomPostInstall$
+DefVar $CustomPostDeinstall$
+DefVar $ExitCode$
+DefVar $ErrorString$
+DefVar $FunctionStatus$
+DefVar $INST_SystemType$
+DefVar $InstallDir$
+DefVar $InstalledVersion$
 DefVar $LogDir$
+DefVar $MinimumSpace$
+DefVar $MSVersion$
 DefVar $ProductId$  
 DefVar $ProductName$
 DefVar $ProductVersion$
 DefVar $ProductVersionWoDots$
-DefVar $InstalledVersion$
-DefVar $MinimumSpace$
-DefVar $SetupFile64$
-DefVar $ExitCode$
-DefVar $RegUninstall$
-DefVar $RegId$
-DefVar $MSVersion$
-DefVar $INST_SystemType$
-DefVar $SearchPattern$
-DefVar $InstallDir$
 DefVar $RegEnv$
+DefVar $RegId$
+DefVar $RegBitScope$
+DefVar $SearchPattern$
+DefVar $SetupFile64$
 DefVar $UninstallProgram$
-DefVar $ConfigSystempath$
-DefVar $path$
-DefVar $path_before$
-DefStringList $dirsToAdd$
-DefStringList $splitted$
-DefVar $CurrentPathElement$
-DefVar $CustomPostInstall$
-DefVar $CustomPostDeinstall$
-
-DefStringList $ResultList64$
+DefStringList $DirsToAdd$
+DefStringList $PathDirsToAdd$
+DefStringList $ResultList$
 
 Set $LogDir$ 		= "%opsiLogDir%"
 Set $INST_SystemType$   = GetSystemType
@@ -36,7 +35,7 @@ if not ($MSVersion$ = "10.0")
 	Logwarning "Only tested with windows 10! Please report to the maintainer successful installation on other windows versions."	
 endif
 if not ($INST_SystemType$ = "64 Bit System")
-	LogError "Actually there is no 32 bit version included in this packet!"
+	LogError "Actually there is no 32 bit version included in this package!"
 	isFatalError
 endif
 
@@ -49,17 +48,17 @@ Set $ProductVersionWoDots$ = takestring (0, splitString($ProductVersion$, ".")) 
 ; ---------------------------------------------------------------
 ; - Please edit the following values                             -
 ; ----------------------------------------------------------------
-Set $ProductId$	= "dfn_ghostscript"
-Set $ProductName$       = "Ghostscript"
-Set $MinimumSpace$	= "40 MB"
+Set $ProductId$		= "dfn_ghostscript"
+Set $ProductName$  	= "Ghostscript"
+Set $MinimumSpace$	= "60 MB"
 Set $SetupFile64$	= "gs" + $ProductVersionWoDots$ + "w64.exe"
-Set $RegUninstall$	= "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
-Set $RegEnv$  = "[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment]"
 ; ----------------------------------------------------------------
 
-include_append "section_sub_check_exitcode.opsiinc"
-include_append "section_sub_search_registry64_uninstall_keys.opsiinc"
-include_append "section_sub_config_systempath.opsiinc"
+; exitcode library von UIB (siehe C:\program files(x86)\opsi.org\opsi-client-agent\opsi-winst\lib) mit 'local functions'
+importLib "uib_exitcode.opsiscript"
+; Library registry search uninstall keys (local functions)
+importLib "func_search_registry_uninstall_keys.opsiinc"
+importLib "func_config_systempath.opsiinc"
 
 comment "Show product picture"
 if (FileExists("%ScriptPath%\..\lib\icons\%installingProdName%.png"))
