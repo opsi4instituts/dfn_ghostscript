@@ -1,0 +1,91 @@
+; Adds all entries from the stringlist $DirsToAdd$ to the path, without altering its order
+; Returns the string "success"
+DefFunc AddToPath(val $DirsToAdd$ : stringlist) : string
+
+	DefVar $PathBefore$
+	DefVar $Path$
+	DefVar $RegEnv$
+	Set $RegEnv$ = "[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment]"
+	
+	set $PathBefore$ = GetRegistryStringValueSysNative($RegEnv$ + " Path")
+	set $Path$ = $PathBefore$
+
+	for %s% in $DirsToAdd$ do Sub_add_item_to_path ;prüfe, ob schon pfade vorhanden sind
+	Sub_commit_changes
+	
+	[Sub_add_item_to_path]
+	if not (contains ($Path$, "%s%"))
+		set $Path$ = $Path$ + ";" + "%s%"
+	endif
+	
+	[Sub_commit_changes]
+	comment "Path before: '" + $path_before$ + "'"
+	comment "Path now: '" + $path$ + "'"
+
+	registry_write_path
+
+	; only reboot if "Path" was changed and reboot desired
+	if ($ConfigSystempath$ = "yes with reboot") 
+		if not (lower($Path$) = lower($PathBefore$))
+			ExitWindows /Reboot
+		endif
+	endif
+	
+	set $result$ = "success"
+	
+	[registry_write_path]
+	openkey $RegEnv$
+	set "Path"=REG_EXPAND_SZ:"$Path$"
+
+endFunc
+
+; Removes all entries in the system path which contains $DirsToRemove$
+; Returns the string "success"
+DefFunc RemoveContainingFromPath(val $DirsToRemove$ : string) : string
+	
+	DefVar $PathBefore$
+	DefVar $Path$
+	DefVar $RegEnv$
+	DefStringList $Splitted$
+	
+	Set $RegEnv$ = "[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment]"
+
+	set $PathBefore$ = GetRegistryStringValueSysNative($RegEnv$ + " Path")
+	set $Path$ = $PathBefore$
+	set $Splitted$ = splitString ($Path$, ";")
+	;dahinter fehlen jetzt die semikolons, also beim vergleichen wieder anfügen
+                                                         
+	for %a% in $Splitted$ do Sub_remove_item_from_path
+	Sub_commit_changes
+	
+	[Sub_remove_item_from_path]
+	set $CurrentPathElement$ = "%a%"
+	; contains ist case-sensitive, lower vermeidet Fehler beim Entfernen (Danke an Andreas Welbers für den Patch!)
+	if contains (lower($CurrentPathElement$), lower($DirsToRemove$))
+		;if there is a leading ";", we know that there are values in front of this one, so we can delete ";VALUE" completly
+		set $Path$ = stringReplace($Path$, ";" + "%a%" , "")
+		;if the value is still there now, there are no entrys before this one, so have to remove "VALUE;"
+		set $Path$ = stringReplace($Path$, "%a%" + ";" , "")
+	endif
+	
+	[Sub_commit_changes]
+	comment "Path before: '" + $path_before$ + "'"
+	comment "Path now: '" + $path$ + "'"
+
+	registry_write_path
+	
+	; only reboot if "Path" was changed and reboot desired
+	if ($ConfigSystempath$ = "yes with reboot") 
+		if not (lower($Path$) = lower($PathBefore$))
+			ExitWindows /Reboot
+		endif
+	endif
+	
+	set $result$ = "success"
+	
+	[registry_write_path]
+	openkey $RegEnv$
+	set "Path"=REG_EXPAND_SZ:"$Path$"
+
+
+endFunc
